@@ -1,0 +1,6 @@
+{
+  "name": "DisasterGuard AI - Smart Disaster Relief System",
+  "description": "Real-time citizen safety intelligence, hazard proximity detection, safest evacuation routing, and emergency resource management platform.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
