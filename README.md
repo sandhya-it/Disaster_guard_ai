@@ -154,6 +154,7 @@ DisasterGuard AI provides shelter information such as:
 - Safety status
 
 
+
 **5. 📍 Real-Time Location Awareness**
 
 Location information plays an important role in disaster response.
@@ -165,6 +166,7 @@ Hazard identification
 Shelter recommendations
 Evacuation routes
 Emergency SOS
+
 
 
 **6. ⚠️ Active Zone Warnings**
@@ -186,6 +188,7 @@ Indicates that roads or underpasses may be blocked by floodwater.
 Provides information about newly available emergency shelter capacity.
 
 The warning system helps users quickly identify important changes in their surroundings.
+
 
 
 **7. 🧭 Evacuation Route Assistance**
@@ -218,6 +221,7 @@ Evacuation Assistance
 This can help users make more informed decisions during an evacuation.
 
 
+
 **8. 🆘 Emergency SOS**
 
 The Emergency SOS system provides a dedicated emergency action for users who require assistance.
@@ -239,6 +243,7 @@ Rescue / Assistance
 The dashboard provides a prominent SOS interface so that emergency assistance can be accessed quickly.
 
 
+
 **9. 🧪 Disaster Simulation Lab**
 
 The Simulation Lab provides a controlled environment for testing disaster scenarios.
@@ -255,6 +260,7 @@ Potential simulations include:
 
 Simulation capabilities can help emergency-management teams evaluate response procedures before real-world deployment.
 Emergency response coordination
+
 
 
 **🔄 System Workflow**
@@ -290,6 +296,7 @@ The overall DisasterGuard AI workflow can be represented as:
                   ┌───────────────────┐
                   │ Emergency Response│
                   └───────────────────┘
+
 
 
 **🛠️ Technology Stack**
@@ -330,6 +337,7 @@ npm
 Modern web development tooling
 
 The exact services and APIs depend on the implementation and deployment configuration.
+
 
 
 **🏗️ Project Architecture**
@@ -376,6 +384,7 @@ A simplified architecture of DisasterGuard AI:
                     └─────────────────────┘
 
 
+
 **🔐 Security & Privacy**
 
 Disaster-management platforms can handle sensitive information, especially user location and emergency information.
@@ -395,6 +404,7 @@ Restrict administrative access
 Emergency location information should only be shared with appropriate services and systems.
 
 
+
 **💻 Installation**
 
 1. Clone the Repository
@@ -407,6 +417,7 @@ npm install
 npm run dev
 
 The application will be available through the local development URL shown in the terminal.
+
 
 
 **🎨 User Experience**
@@ -427,6 +438,7 @@ Responsive design
 Easy-to-understand information
 
 The objective is to provide users with important disaster information as quickly as possible.
+
 
 
 **🌍 Social Impact**
@@ -462,6 +474,7 @@ The EOC interface can help organize information for disaster-management operatio
 The platform can support citizens and emergency teams in preparing for and responding to disasters.
 
 
+
 **🚀 Future Enhancements**
 
 Potential future enhancements include:
@@ -473,6 +486,7 @@ Potential future enhancements include:
 🔊 Voice-based emergency assistance
 📡 Offline / low-connectivity emergency mode
 🏛️ Integration with government disaster-management systems
+
 
 
 **⚠️ Limitations**
@@ -490,6 +504,7 @@ Shelter information may change during an emergency
 During an actual emergency, users should always follow instructions issued by authorized emergency-management authorities.
 
 
+
 **🧪 Testing**
 
 The application should be tested across:
@@ -502,6 +517,7 @@ Network failure scenarios
 Error handling
 
 Special attention should be given to emergency workflows because usability and reliability are critical.
+
 
 
 **🚀 Deployment**
@@ -522,14 +538,18 @@ Reliable external data sources
 Backup and recovery mechanisms
 
 
+
 **📜 License**
 
 This project is intended for educational, research, and prototype purposes.
 
 
+
 **🌐 LIVE DEMO**
 
 DisasterGuard AI:
+https://vercel.com/aethergrid1/disaster_guard_ai
+
 
 
 **❤️ Vision**
