@@ -40,8 +40,9 @@ export const DisasterZonesNewsMap: React.FC<DisasterZonesNewsMapProps> = ({
 
   const [selectedZone, setSelectedZone] = useState<DisasterZone | null>(null);
   const [filterSeverity, setFilterSeverity] = useState<string>('ALL');
-  const [mapStyle, setMapStyle] = useState<'dark' | 'satellite' | 'street'>('dark');
+  const [mapStyle, setMapStyle] = useState<'satellite' | 'street'>('satellite');
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const baseTilesRef = useRef<{ [key: string]: L.LayerGroup }>({});
 
   // Initialize News Disaster Map
   useEffect(() => {
@@ -55,14 +56,30 @@ export const DisasterZonesNewsMap: React.FC<DisasterZonesNewsMapProps> = ({
         attributionControl: false,
       });
 
-      // Tile Layer - Dark weather news style
-      L.tileLayer(
-        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}{r}.png',
-        {
-          subdomains: 'abcd',
-          maxZoom: 19,
-        }
-      ).addTo(map);
+      // Real Satellite Imagery (Esri World Imagery) + Place/Road labels
+      const esriSatellite = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        { maxZoom: 19 }
+      );
+      const cartoLabels = L.tileLayer(
+        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png',
+        { subdomains: 'abcd', maxZoom: 19, opacity: 0.9 }
+      );
+      const satelliteGroup = L.layerGroup([esriSatellite, cartoLabels]);
+
+      // Street OpenStreetMap
+      const osmTiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+      });
+      const streetGroup = L.layerGroup([osmTiles]);
+
+      baseTilesRef.current = {
+        satellite: satelliteGroup,
+        street: streetGroup,
+      };
+
+      // Default to Satellite View
+      satelliteGroup.addTo(map);
 
       L.control.zoom({ position: 'bottomright' }).addTo(map);
 
@@ -77,6 +94,23 @@ export const DisasterZonesNewsMap: React.FC<DisasterZonesNewsMapProps> = ({
       }
     };
   }, []);
+
+  // Sync basemap layer changes
+  useEffect(() => {
+    if (!mapInstanceRef.current || !baseTilesRef.current) return;
+    const map = mapInstanceRef.current;
+    const layers = baseTilesRef.current;
+
+    Object.keys(layers).forEach((key) => {
+      if (key !== mapStyle && map.hasLayer(layers[key])) {
+        map.removeLayer(layers[key]);
+      }
+    });
+
+    if (layers[mapStyle] && !map.hasLayer(layers[mapStyle])) {
+      layers[mapStyle].addTo(map);
+    }
+  }, [mapStyle]);
 
   // Render High-Contrast Broadcast News Styled Disaster Zones
   useEffect(() => {
@@ -306,6 +340,28 @@ export const DisasterZonesNewsMap: React.FC<DisasterZonesNewsMapProps> = ({
               {sev}
             </button>
           ))}
+        </div>
+
+        {/* Satellite View vs Street Map Switcher */}
+        <div className="flex items-center gap-1 bg-[#090d16]/90 border border-white/10 backdrop-blur-md p-1 rounded-xl shadow-lg">
+          <button
+            onClick={() => setMapStyle('satellite')}
+            className={`px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wider transition-all ${
+              mapStyle === 'satellite' ? 'bg-cyan-500 text-slate-950 shadow' : 'text-slate-300 hover:text-white'
+            }`}
+            title="Real Satellite Imagery"
+          >
+            🛰️ Satellite View
+          </button>
+          <button
+            onClick={() => setMapStyle('street')}
+            className={`px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wider transition-all ${
+              mapStyle === 'street' ? 'bg-cyan-500 text-slate-950 shadow' : 'text-slate-300 hover:text-white'
+            }`}
+            title="Street Map"
+          >
+            🗺️ Street Map
+          </button>
         </div>
       </div>
 

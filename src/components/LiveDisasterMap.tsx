@@ -62,6 +62,9 @@ export const LiveDisasterMap: React.FC<LiveDisasterMapProps> = ({
   const [showEvacuationRoute, setShowEvacuationRoute] = useState(true);
   const [isLegendOpen, setIsLegendOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  // Basemap style: default to high-resolution real satellite view or street map
+  const [basemapStyle, setBasemapStyle] = useState<'satellite' | 'street'>('satellite');
+  const baseTilesRef = useRef<{ [key: string]: L.LayerGroup }>({});
 
   // Initialize Map
   useEffect(() => {
@@ -74,20 +77,38 @@ export const LiveDisasterMap: React.FC<LiveDisasterMapProps> = ({
         zoomControl: false,
       });
 
-      // Dark Matter CartoDB Basemap for high-contrast command center look
-      const darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; OpenStreetMap',
-        maxZoom: 19,
-        subdomains: 'abcd',
-      });
+      // Real High-Resolution Satellite imagery (Esri World Imagery) + Crisp Place/Street Labels
+      const esriSatellite = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        {
+          attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+          maxZoom: 19,
+        }
+      );
+      const cartoLabels = L.tileLayer(
+        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png',
+        {
+          subdomains: 'abcd',
+          maxZoom: 19,
+          opacity: 0.85,
+        }
+      );
+      const satelliteGroup = L.layerGroup([esriSatellite, cartoLabels]);
 
-      // Fallback standard OpenStreetMap
+      // Standard OpenStreetMap Streets
       const osmTiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; OpenStreetMap contributors',
       });
+      const streetGroup = L.layerGroup([osmTiles]);
 
-      darkTiles.addTo(map);
+      baseTilesRef.current = {
+        satellite: satelliteGroup,
+        street: streetGroup,
+      };
+
+      // Default basemap is REAL SATELLITE
+      satelliteGroup.addTo(map);
 
       // Custom Zoom control at bottom right
       L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -110,6 +131,24 @@ export const LiveDisasterMap: React.FC<LiveDisasterMapProps> = ({
       // Keep map instance mounted
     };
   }, []);
+
+  // Update basemap layer when basemapStyle changes
+  useEffect(() => {
+    if (!mapInstanceRef.current || !baseTilesRef.current) return;
+    const map = mapInstanceRef.current;
+    const layers = baseTilesRef.current;
+
+    // Remove other basemaps and activate current
+    Object.keys(layers).forEach((key) => {
+      if (key !== basemapStyle && map.hasLayer(layers[key])) {
+        map.removeLayer(layers[key]);
+      }
+    });
+
+    if (layers[basemapStyle] && !map.hasLayer(layers[basemapStyle])) {
+      layers[basemapStyle].addTo(map);
+    }
+  }, [basemapStyle]);
 
   // Update map center when user location moves significantly
   const prevLocRef = useRef<GeoPoint>(userLocation);
@@ -517,7 +556,7 @@ export const LiveDisasterMap: React.FC<LiveDisasterMapProps> = ({
       {/* Map Element */}
       <div ref={mapContainerRef} className="w-full h-full z-0" />
 
-      {/* Top Map Floating Telemetry HUD */}
+      {/* Top Map Floating Telemetry HUD & Basemap Switcher */}
       <div className="absolute top-3 left-3 z-10 flex flex-wrap items-center gap-2 pointer-events-auto">
         <div className="glass-panel px-3 py-1.5 rounded-lg flex items-center space-x-2 text-xs font-mono-tech border border-cyan-500/30 shadow-lg">
           <span className="h-2 w-2 rounded-full bg-cyan-400 animate-beacon"></span>
@@ -526,6 +565,32 @@ export const LiveDisasterMap: React.FC<LiveDisasterMapProps> = ({
           <span className="text-slate-300">
             {userLocation.lat.toFixed(4)}°N, {userLocation.lng.toFixed(4)}°E
           </span>
+        </div>
+
+        {/* View Mode Switcher: Satellite View vs Street Map */}
+        <div className="glass-panel p-1 rounded-lg flex items-center space-x-1 border border-cyan-500/30 text-xs shadow-lg">
+          <button
+            onClick={() => setBasemapStyle('satellite')}
+            className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all ${
+              basemapStyle === 'satellite'
+                ? 'bg-cyan-500 text-slate-950 shadow-md'
+                : 'text-slate-300 hover:text-white'
+            }`}
+            title="Real Satellite Imagery"
+          >
+            🛰️ Satellite View
+          </button>
+          <button
+            onClick={() => setBasemapStyle('street')}
+            className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all ${
+              basemapStyle === 'street'
+                ? 'bg-cyan-500 text-slate-950 shadow-md'
+                : 'text-slate-300 hover:text-white'
+            }`}
+            title="Street Map"
+          >
+            🗺️ Street Map
+          </button>
         </div>
 
         {activeEvacuationRoute && (
